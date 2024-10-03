@@ -833,31 +833,31 @@ extension Color {
 }
 
 // 定義字體類型的枚舉
-enum ArialFontType: String {
-    case regular = "ArialMT"       // Regular 字體
-    case semibold = "Arial-Semibold" // Semibold 字體（根據需要確保存在）
-    case bold = "Arial-BoldMT"     // Bold 字體
-    case black = "Arial-Black"     // Black 字體（根據需要確保存在）
+enum LatoFontType: String {
+    case regular = "Lato-Regular"      // 定義常規字體，對應的字體名稱為 "Lato-Regular"
+    case semibold = "Lato-Semibold"    // 定義半粗體字體，對應的字體名稱為 "Lato-Semibold"
+    case bold = "Lato-Bold"             // 定義粗體字體，對應的字體名稱為 "Lato-Bold"
+    case black = "Lato-Black"           // 定義黑體字體，對應的字體名稱為 "Lato-Black"
 }
 
-// 自定義字體修改器
+// 定義 FontModifier 結構以實現自定義字體樣式
 struct FontModifier: ViewModifier {
     
-    var type: ArialFontType    // 使用新的字體枚舉，定義字體類型
-    var size: CGFloat           // 定義字體大小
+    var type: LatoFontType, size: CGFloat  // 存儲字體類型和字體大小
     
-    // 初始化函數，設置字體類型和大小的默認值
-    init(_ type: ArialFontType = .regular, size: CGFloat = 16) {
-        self.type = type // 設置字體類型
-        self.size = size // 設置字體大小
+    // 初始化 FontModifier，提供默認值
+    init(_ type: LatoFontType = .regular, size: CGFloat = 16) {
+        self.type = type  // 設置字體類型
+        self.size = size  // 設置字體大小
     }
     
-    // ViewModifier 的必須實現方法
+    // 定義修飾符的主體內容
     func body(content: Content) -> some View {
-        // 使用 Font.custom 方法應用自定義字體和大小
-        content.font(Font.custom(type.rawValue, size: size))
+        // 應用自定義字體到傳入的內容
+        content.font(Font.custom(type.rawValue, size: size))  // 使用自定義字體和大小
     }
 }
+
 
 
 extension Image {
