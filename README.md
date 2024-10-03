@@ -1,82 +1,56 @@
-Fuji Kaze Fan App
+# ABoutPage---Fuji Kaze
+
 A SwiftUI-based iOS application showcasing the music and upcoming concerts of Japanese singer-songwriter Fuji Kaze.
-Features
 
-Browse Fuji Kaze's albums and popular releases
-Interactive music player interface
-Detailed album view with descriptions
-Artist profile section
-Upcoming concerts with interactive maps
+## Features
 
-Technical Details
-Requirements
+- Browse Fuji Kaze's albums and popular releases
+- Interactive music player interface
+- Detailed album view with descriptions
+- Artist profile section
+- Upcoming concerts with interactive maps
 
-iOS 14.0 or later
-Xcode 12 or later
-Swift 5.3 or later
+## Technical Details
 
-Key Components
+### Requirements
 
-HomeView
+- iOS 14.0 or later
+- Xcode 12 or later
+- Swift 5.3 or later
 
-Main navigation hub
-Displays albums, popular releases, and artist information
+### Key Components
+
+- **HomeView**: 
+  - Main navigation hub displaying albums, popular releases, and artist information.
+
+- **PlayerView**: 
+  - Custom music player interface with play/pause functionality, progress slider, and next/previous track buttons.
+
+- **AlbumDetailView**: 
+  - Detailed album information with a scrollable description and links to purchase/stream.
+
+- **ConcertView**: 
+  - Displays upcoming concert information with embedded maps showing venue locations.
+
+## Data Structures
+
+- **Music**: Represents album and song information.
+- **Concert**: Contains concert details including location data.
+
+## Custom UI Elements
+
+- Neumorphic design using custom shadows.
+- Custom font implementation (Lato font family).
+- Circular disc visualizations for music.
+
+## Implementation Highlights
+
+### Custom Color System
 
 
-PlayerView
-
-Custom music player interface
-Play/pause functionality
-Progress slider
-Next/previous track buttons
-
-
-AlbumDetailView
-
-Detailed album information
-Scrollable description
-Link to purchase/stream
-
-
-ConcertView
-
-Displays upcoming concert information
-Embedded maps showing venue locations
-
-
-
-Data Structures
-
-Music: Represents album and song information
-Concert: Contains concert details including location data
-
-Custom UI Elements
-
-Neumorphic design using custom shadows
-Custom font implementation (Lato font family)
-Circular disc visualizations for music
-
-Implementation Highlights
-Custom Color System
-swiftCopyextension Color {
-    static let primary_color = Color(white: 1)
-    static let main_color = Color(hex: "657592")
-    // ... other color definitions
-}
-Reusable Components
-
-FontModifier: Custom font styling
-NeuShadow: Neumorphic shadow effect
-Custom view components for albums and music discs
-
-Getting Started
-
-Clone the repository
-Open the project in Xcode
-Build and run on simulator or device
 
 Project Structure
-Copy├── Views
+├── Views
 │   ├── HomeView.swift
 │   ├── PlayerView.swift
 │   ├── AlbumDetailView.swift
@@ -88,22 +62,3 @@ Copy├── Views
 │   └── Color+Extensions.swift
 └── Resources
     └── Assets.xcassets
-Dependencies
-This project uses SwiftUI and MapKit frameworks from the standard iOS SDK. No external dependencies are required.
-Notes
-
-The app uses static data for demonstration purposes
-Music playback functionality is simulated
-External links open in the default browser
-
-Future Enhancements
-
-Implement actual music playback
-Add a backend service for dynamic content
-Implement user favorites and playlists
-Add social sharing features
-
-Credits
-
-All music and artist information belongs to Fuji Kaze
-App designed and developed by Jesse Liang
