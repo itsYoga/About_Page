@@ -2,7 +2,7 @@
 //  ContentView.swift
 //  About_Page
 //
-//  Created by Jesse Liang on 2024/09/25.
+//  Created by Jesse Liang on 2024/09/21.
 //
 
 import SwiftUI
@@ -10,17 +10,17 @@ import Foundation
 import MapKit
 
 
-fileprivate let HORIZONTAL_SPACING: CGFloat = 24
+fileprivate let HORIZONTAL_SPACING: CGFloat = 24 // 定義水平間距
 
 // Music 結構體用於表示音樂項目，並且遵循 Identifiable 協議以便於 SwiftUI 的列表和迭代
 
 struct Music: Identifiable {
     let id = UUID()  // 唯一識別碼
-    let name: String  // 名稱
+    let name: String  // 音樂名稱
     let artistName: String  // 藝術家名稱
     let coverImage: Image  // 封面圖片
     let description: String?  // 可選專輯描述
-    let Link: URL?  //
+    let Link: URL?  // 音樂連結
 }
 
 
@@ -131,45 +131,45 @@ class PlayerViewModel: ObservableObject {
 
 // HomeView 結構體表示主頁視圖
 struct HomeView: View {
-    @StateObject private var viewModel = HomeViewModel()
-    @State private var selectedAlbum: Music?
-    @State private var selectedMusic: Music?
-    @State private var showMap = false // New state to show the map
+    @StateObject private var viewModel = HomeViewModel() // 初始化視圖模型
+    @State private var selectedAlbum: Music?  // 選擇的專輯
+    @State private var selectedMusic: Music? // 選擇的音樂
+    @State private var showMap = false // 用於顯示地圖的狀態
 
     var body: some View {
         ZStack {
-            Color.primary_color.edgesIgnoringSafeArea(.all)
+            Color.primary_color.edgesIgnoringSafeArea(.all) // 背景顏色
 
-            ScrollView(.vertical, showsIndicators: false) {
+            ScrollView(.vertical, showsIndicators: false) { // 垂直滾動視圖
                 VStack(alignment: .leading, spacing: 0) {
-                    HomeHeaderView(headerStr: viewModel.headerStr)
+                    HomeHeaderView(headerStr: viewModel.headerStr) // 顯示標題
                     
                     HomeAlbumsView(albums: viewModel.albums) { album in
-                        selectedAlbum = album
+                        selectedAlbum = album // 選擇專輯
                     }
                     
                     HomePopularReleasesView(popularReleases: viewModel.popularReleases) { music in
-                        selectedMusic = music
-                        viewModel.selectMusic(music: music)
+                        selectedMusic = music // 選擇音樂
+                        viewModel.selectMusic(music: music)  // 通知視圖模型
                     }
                     
-                    HomeArtistView(onSelect: viewModel.selectMusic)
+                    HomeArtistView(onSelect: viewModel.selectMusic) // 顯示藝術家視圖
                     
                     
-                    .padding(.horizontal, HORIZONTAL_SPACING)
+                    .padding(.horizontal, HORIZONTAL_SPACING) // 設置邊距
 
-                    Spacer().frame(height: 150)
-                    Spacer()
+                    Spacer().frame(height: 150)  // 留白
+                    Spacer()  // 留白
                 }
                 .fullScreenCover(item: $selectedAlbum) { album in
-                    AlbumDetailView(album: album)
+                    AlbumDetailView(album: album) // 全螢幕專輯詳細視圖
                 }
                 .fullScreenCover(item: $selectedMusic) { music in
-                    PlayerView(viewModel: PlayerViewModel(model: music))
+                    PlayerView(viewModel: PlayerViewModel(model: music)) // 全螢幕播放器視圖
                 }
 
             }
-            .edgesIgnoringSafeArea([.horizontal, .bottom])
+            .edgesIgnoringSafeArea([.horizontal, .bottom]) // 內容邊距
         }
     }
 }
@@ -177,44 +177,61 @@ struct HomeView: View {
 // HomeHeaderView 結構體表示首頁標題視圖
 fileprivate struct HomeHeaderView: View {
     let headerStr: String // 標題文字
+    
+    // 添加狀態變量來控制動畫效果
+    @State private var isAnimating = false
+    
     var body: some View {
         HStack(alignment: .center) {
-            Text(headerStr)
-                .foregroundColor(.text_header)
-                .modifier(FontModifier(.black, size: 28))
-            Spacer()
-            Button(action: { /* Implement search functionality */ }) {
-                Image.search
-                    .resizable()
-                    .frame(width: 16, height: 16)
-                    .padding(12)
-                    .background(Color.primary_color)
-                    .cornerRadius(20)
-                    .modifier(NeuShadow())
-                    .accessibilityLabel("Search Music")  // Adding accessibility label
+            Text(headerStr) // 顯示標題
+                .foregroundColor(.text_header) // 標題顏色
+                .modifier(FontModifier(.black, size: 28)) // 字型修飾
+            
+            Spacer() // 彈性空間，將標題與按鈕分開
+            
+            // 使用SF Symbols的搜索圖標並添加動畫
+            Button(action: {
+                // 點擊按鈕時觸發動畫
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isAnimating.toggle()
+                }
+                // 這裡可以添加更多搜索功能的實現
+            }) {
+                Image(systemName: "magnifyingglass") // 使用SF Symbols的搜索圖標magnifyingglass
+                    .resizable()  // 可調整大小
+                    .scaledToFit() // 保持圖標比例
+                    .frame(width: 16, height: 16)  // 設定圖標大小
+                    .padding(12) // 設定內邊距
+                    .background(Color.primary_color) // 背景顏色
+                    .cornerRadius(20) // 圓角
+                    .modifier(NeuShadow()) // 陰影效果
+                    .foregroundColor(.text_header) // 設置圖標顏色
+                    .scaleEffect(isAnimating ? 1.2 : 1.0) // 根據狀態調整縮放比例
+                    .animation(.spring(), value: isAnimating) // 添加彈簧動畫
+                    .accessibilityLabel("Search Music")  // 添加可訪問性標籤
             }
         }
-        .padding(.top, 12)
-        .padding(.horizontal, HORIZONTAL_SPACING) // 設置邊距
+        .padding(.top, 12)  // 上邊距
+        .padding(.horizontal, HORIZONTAL_SPACING) // 設置水平邊距
     }
 }
 
 // HomeAlbumsView 結構體表示首頁專輯視圖
 fileprivate struct HomeAlbumsView: View {
-    let albums: [Music]
-    let onSelect: (Music) -> ()
+    let albums: [Music] // 專輯資料
+    let onSelect: (Music) -> () // 選擇專輯的回調函數
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Albums")
-                .foregroundColor(.text_header)
-                .modifier(FontModifier(.bold, size: 20))
-                .padding(.leading, HORIZONTAL_SPACING)
-            ScrollView(.horizontal, showsIndicators: false) {
+            Text("Albums")  // 專輯標題
+                .foregroundColor(.text_header) // 顏色
+                .modifier(FontModifier(.bold, size: 20)) // 字型修飾
+                .padding(.leading, HORIZONTAL_SPACING) // 左邊距
+            ScrollView(.horizontal, showsIndicators: false) { // 水平滾動視圖
                 HStack {
-                    ForEach(albums) { album in
+                    ForEach(albums) { album in // 遍歷專輯
                         Button(action: {
-                            // Navigate to album detail view
+                            // 點擊專輯時調用回調
                             onSelect(album)
                         }) {
                             AlbumsView(name: album.name,
@@ -239,14 +256,14 @@ fileprivate struct HomePopularReleasesView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Popular Releases")
-                .foregroundColor(.text_header)
-                .modifier(FontModifier(.bold, size: 20))
+            Text("Popular Releases") // 熱門音樂標題
+                .foregroundColor(.text_header) // 顏色
+                .modifier(FontModifier(.bold, size: 20))// 字型修飾
                 .padding(.leading, HORIZONTAL_SPACING)  // 設置邊距
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack {
                     ForEach(popularReleases) { music in // 遍歷熱門音樂
-                        Button(action: { onSelect(music) }) {
+                        Button(action: { onSelect(music) }) {  // 點擊音樂時調用回調
                             MusicDiscView(name: music.name,
                                           artistName: music.artistName,
                                           coverImage: music.coverImage) // 顯示音樂視圖
@@ -268,9 +285,9 @@ fileprivate struct HomeArtistView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Artist") // 藝術家
-                .foregroundColor(.text_header)
-                .modifier(FontModifier(.bold, size: 20))
+            Text("Artist") // 藝術家標題
+                .foregroundColor(.text_header) // 顏色
+                .modifier(FontModifier(.bold, size: 20)) // 字型修飾
                 .padding(.leading, HORIZONTAL_SPACING) // 設置邊距
             
             Button(action: { onSelect(MusicData.Singer) }) {
@@ -297,28 +314,32 @@ fileprivate struct HomeArtistView: View {
 }
 
 
+// 定義 Concert 結構體，遵循 Identifiable 協議以便於 SwiftUI 使用
 struct Concert: Identifiable {
-    let id = UUID() // Unique identifier for each concert
-    let title: String // Title of the concert
-    let date: String // Date of the concert
-    let venue: String // Venue where the concert is held
-    let location: String // General location
-    let image: Image // Image for the concert
-    let latitude: Double // Latitude of the concert location
-    let longitude: Double // Longitude of the concert location
+    let id = UUID() // 每個音樂會的唯一識別碼
+    let title: String // 音樂會的標題
+    let date: String // 音樂會的日期
+    let venue: String // 音樂會舉辦的場地
+    let location: String // 音樂會的一般位置（例如城市或區域）
+    let image: Image // 音樂會的圖片（展示用）
+    let latitude: Double // 音樂會位置的緯度
+    let longitude: Double // 音樂會位置的經度
 }
 
 struct ConcertData {
+    // 靜態方法，返回一個演唱會數組
     static func getConcerts() -> [Concert] {
         return [
-            Concert(title: "ASIA TOUR",
-                    date: "2024.10.26 (土)",
-                    venue: "Singapore Indoor Stadium",
-                    location: "Singapore",
-                    image: Image("concert1"),
-                    latitude: 1.2990,
-                    longitude: 103.8744),
+            // 第一場演唱會
+            Concert(title: "ASIA TOUR", // 演唱會標題
+                    date: "2024.10.26 (土)", // 演唱會日期
+                    venue: "Singapore Indoor Stadium", // 演唱會場地
+                    location: "Singapore", // 演唱會地點
+                    image: Image("concert1"), // 演唱會圖片
+                    latitude: 1.2990, // 經度
+                    longitude: 103.8744), // 緯度
             
+            // 第二場演唱會
             Concert(title: "ASIA TOUR",
                     date: "2024.11.02 (土)",
                     venue: "Axiata Arena",
@@ -327,6 +348,7 @@ struct ConcertData {
                     latitude: 3.0674,
                     longitude: 101.5936),
             
+            // 第三場演唱會
             Concert(title: "ASIA TOUR",
                     date: "2024.11.09 (土)",
                     venue: "Impact Arena",
@@ -335,6 +357,7 @@ struct ConcertData {
                     latitude: 13.8772,
                     longitude: 100.5670),
             
+            // 第四場演唱會
             Concert(title: "ASIA TOUR",
                     date: "2024.11.16 (土)",
                     venue: "Taipei Arena",
@@ -342,117 +365,129 @@ struct ConcertData {
                     image: Image("concert1"),
                     latitude: 25.0520,
                     longitude: 121.5531),
-            // Add more concerts as needed
+            // 可以根據需要添加更多演唱會
         ]
     }
 }
 
+// 演唱會地圖視圖
 struct ConcertMapView: View {
-    var latitude: Double
-    var longitude: Double
+    var latitude: Double // 緯度
+    var longitude: Double // 經度
 
+    // 使用 State 屬性來管理地圖的區域
     @State private var region = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 0, longitude: 0),
-        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+        center: CLLocationCoordinate2D(latitude: 0, longitude: 0), // 初始中心點
+        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05) // 地圖的縮放範圍
     )
     
-    // Define a structure to represent a concert location
+    // 定義一個結構來表示演唱會位置
     struct ConcertLocation: Identifiable {
-        let id = UUID() // Ensure this is present
-        let coordinate: CLLocationCoordinate2D
+        let id = UUID() // 確保每個位置都有唯一的識別碼
+        let coordinate: CLLocationCoordinate2D // 位置的坐標
     }
 
-    // Create an array of concert locations
+    // 創建一個演唱會位置的數組
     private var concertLocations: [ConcertLocation] {
         [ConcertLocation(coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude))]
     }
 
     var body: some View {
+        // 顯示地圖，綁定地圖的區域到 region，並添加演唱會位置的標記
         Map(coordinateRegion: $region, interactionModes: .all, annotationItems: concertLocations) { location in
-            MapPin(coordinate: location.coordinate, tint: .red) // Example of adding a pin
+            MapPin(coordinate: location.coordinate, tint: .red) // 添加紅色釘子標記
         }
         .onAppear {
-            // Set the map center to the concert's location
+            // 當視圖出現時，設置地圖的中心點為演唱會的位置
             region.center = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         }
-        .cornerRadius(12) // Optional: Round corners of the map
-        .shadow(radius: 5) // Optional: Add shadow for better aesthetics
+        .cornerRadius(12) // 可選：圓角處理
+        .shadow(radius: 5) // 可選：添加陰影以增強美觀
     }
 }
 
 
+// 演唱會視圖
 struct ConcertView: View {
-    var concert: Concert
-    
+    var concert: Concert // 演唱會數據模型
+
     var body: some View {
         VStack {
-            // Display the concert image
+            // 顯示演唱會圖片
             concert.image
-                .resizable() // Make the image resizable
-                .scaledToFit() // Maintain aspect ratio
-                .frame(height: 200) // Set a height for the image
-                .cornerRadius(12) // Optional: Round corners for aesthetics
+                .resizable() // 使圖片可調整大小
+                .scaledToFit() // 維持圖片的寬高比
+                .frame(height: 200) // 設置圖片高度為 200
+                .cornerRadius(12) // 可選：圓角處理
             
-            
+            // 顯示演唱會標題
             Text(concert.title)
-                .font(.largeTitle)
-                .padding(.top) // Add some space above the title
+                .font(.largeTitle) // 設置字體為大標題
+                .padding(.top) // 在標題上方添加一些空間
             
-            
+            // 顯示演唱會地點
             Text(concert.location)
-                .font(.subheadline)
-                .padding(.bottom, 7) // Add some space below the location
+                .font(.subheadline) // 設置字體為子標題
+                .padding(.bottom, 7) // 在地點下方添加一些空間
             
+            // 顯示演唱會場地
             Text(concert.venue)
-                .font(.subheadline)
-                .padding(.bottom, 5) // Add some space below the venue
+                .font(.subheadline) // 設置字體為子標題
+                .padding(.bottom, 5) // 在場地下方添加一些空間
             
-            // Display the concert date
+            // 顯示演唱會日期
             Text(concert.date)
-                .font(.body)
-                .padding(.bottom) // Add some space below the date
+                .font(.body) // 設置字體為正文
+                .padding(.bottom) // 在日期下方添加一些空間
             
-            // Small embedded map view
+            // 嵌入的小型地圖視圖
             ConcertMapView(latitude: concert.latitude, longitude: concert.longitude)
-                .frame(height: 200) // Set the height of the map
+                .frame(height: 200) // 設置地圖高度為 200
             
-            Spacer() // Add some space below the map
+            Spacer() // 在地圖下方添加一些空間
         }
-        .padding()
+        .padding() // 整體視圖添加內邊距
     }
     
-    // Helper function to format the date
+    // 輔助函數，用於格式化日期
     private func formattedDate(_ date: Date) -> String {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium // Use a medium date style
-        return dateFormatter.string(from: date)
+        dateFormatter.dateStyle = .medium // 使用中等日期樣式
+        return dateFormatter.string(from: date) // 返回格式化後的日期字符串
     }
 }
 
+// 播放器視圖
 struct PlayerView: View {
     
+    // 獲取當前視圖的呈現模式，以便於關閉視圖
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     
+    // 使用狀態對象來管理播放視圖的數據
     @StateObject var viewModel: PlayerViewModel
     
     var body: some View {
         ZStack {
+            // 背景顏色
             Color.primary_color
-                .edgesIgnoringSafeArea(.all)
+                .edgesIgnoringSafeArea(.all) // 擴展顏色至全屏
             
             VStack(alignment: .center, spacing: 0) {
                 // 頂部工具列
                 HStack(alignment: .center) {
+                    // 返回按鈕
                     Button(action: { self.presentationMode.wrappedValue.dismiss() }) {
                         Image.close
                             .resizable()
-                            .frame(width: 20, height: 20)
+                            .frame(width: 20, height: 20) // 設置按鈕大小
                             .padding(8)
                             .background(Color.primary_color)
                             .cornerRadius(20)
-                            .modifier(NeuShadow())
+                            .modifier(NeuShadow()) // 添加陰影效果
                     }
-                    Spacer()
+                    Spacer() // 使返回按鈕和選項按鈕之間的間距
+                    
+                    // 選項按鈕
                     Button(action: { /* 實現選項功能 */ }) {
                         Image.options
                             .resizable()
@@ -463,33 +498,33 @@ struct PlayerView: View {
                             .modifier(NeuShadow())
                     }
                 }
-                .padding(.horizontal, HORIZONTAL_SPACING)
-                .padding(.top, 12)
+                .padding(.horizontal, HORIZONTAL_SPACING) // 添加水平內邊距
+                .padding(.top, 12) // 添加上方內邊距
                 
                 // 專輯封面
                 PlayerDiscView(coverImage: viewModel.model.coverImage)
                     .padding(.top, 24)
                 
                 // 歌曲詳情
-                Text(viewModel.model.name)
+                Text(viewModel.model.name) // 歌曲名稱
                     .foregroundColor(.text_primary)
                     .modifier(FontModifier(.black, size: 30))
                     .padding(.top, 12)
-                Text(viewModel.model.artistName)
+                Text(viewModel.model.artistName) // 藝人名稱
                     .foregroundColor(.text_primary_f1)
                     .modifier(FontModifier(.semibold, size: 18))
                     .padding(.top, 12)
                 
-                Spacer()
+                Spacer() // 添加間距以推動元素向上
                 
                 // 播放進度條和喜歡按鈕
                 HStack(alignment: .center, spacing: 12) {
-                    Text("01:30")
+                    Text("01:30") // 播放進度顯示
                         .foregroundColor(.text_primary)
                         .modifier(FontModifier(.bold, size: 12))
-                    Slider(value: $viewModel.slider, in: 0...100)
+                    Slider(value: $viewModel.slider, in: 0...100) // 播放進度條
                         .accentColor(.main_white)
-                    Button(action: { viewModel.liked.toggle() }) {
+                    Button(action: { viewModel.liked.toggle() }) { // 喜歡按鈕
                         (viewModel.liked ? Image.heart_filled : Image.heart)
                             .resizable()
                             .frame(width: 20, height: 20)
@@ -497,25 +532,28 @@ struct PlayerView: View {
                 }
                 .padding(.horizontal, 45)
                 
-                Spacer()
+                Spacer() // 添加間距以推動元素向上
                 
                 // 播放控制按鈕
                 HStack(alignment: .center) {
+                    // 上一曲按鈕
                     Button(action: { /* 實現上一曲功能 */ }) {
                         Image.next
                             .resizable()
                             .frame(width: 18, height: 18)
-                            .rotationEffect(Angle(degrees: 180))
+                            .rotationEffect(Angle(degrees: 180)) // 旋轉圖標
                             .padding(24)
                             .background(Color.primary_color)
                             .cornerRadius(40)
                             .modifier(NeuShadow())
                     }
-                    Spacer()
+                    Spacer() // 添加間距
+                    
+                    // 播放/暫停按鈕
                     Button(action: {
-                        viewModel.isPlaying.toggle()
+                        viewModel.isPlaying.toggle() // 切換播放狀態
                         
-                        // Open the link when the play button is tapped
+                        // 如果有鏈接，則在點擊時打開鏈接
                         if let url = viewModel.model.Link {
                             UIApplication.shared.open(url, options: [:], completionHandler: nil)
                         }
@@ -528,7 +566,9 @@ struct PlayerView: View {
                             .cornerRadius(70)
                             .modifier(NeuShadow())
                     }
-                    Spacer()
+                    Spacer() // 添加間距
+                    
+                    // 下一曲按鈕
                     Button(action: { /* 實現下一曲功能 */ }) {
                         Image.next
                             .resizable()
@@ -541,209 +581,254 @@ struct PlayerView: View {
                 }
                 .padding(.horizontal, 32)
             }
-            .padding(.bottom, HORIZONTAL_SPACING)
-            .animation(.spring(), value: viewModel.isPlaying)
+            .padding(.bottom, HORIZONTAL_SPACING) // 添加底部內邊距
+            .animation(.spring(), value: viewModel.isPlaying) // 根據播放狀態添加動畫效果
         }
     }
 }
+
+// 專輯詳細視圖
 struct AlbumDetailView: View {
-    let album: Music
-    @Environment(\.presentationMode) var presentationMode // Add this line
+    let album: Music // 專輯資料
+    @Environment(\.presentationMode) var presentationMode // 用於控制視圖的呈現模式
 
     var body: some View {
         ZStack {
+            // 設置背景顏色
             Color.primary_color.edgesIgnoringSafeArea(.all)
+            
             VStack {
-                // Album cover
+                // 專輯封面
                 album.coverImage
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 250)
-                    .cornerRadius(20)
-
+                    .resizable() // 使圖片可調整大小
+                    .scaledToFit() // 按比例縮放以適應框架
+                    .frame(height: 250) // 設置高度
+                    .cornerRadius(20) // 添加圓角效果
+                
+                // 專輯名稱
                 Text(album.name)
-                    .foregroundColor(.text_primary)
-                    .modifier(FontModifier(.black, size: 30))
-                    .padding(.top, 12)
+                    .foregroundColor(.text_primary) // 設置字體顏色
+                    .modifier(FontModifier(.black, size: 30)) // 設置字體樣式和大小
+                    .padding(.top, 12) // 添加上方內邊距
 
+                // 藝人名稱
                 Text(album.artistName)
                     .foregroundColor(.text_primary_f1)
-                    .modifier(FontModifier(.semibold, size: 18))
-                    .padding(.top, 12)
+                    .modifier(FontModifier(.semibold, size: 18)) // 設置字體樣式和大小
+                    .padding(.top, 12) // 添加上方內邊距
 
-                // Scrollable description
+                // 可滾動的描述
                 ScrollView {
-                    Text(album.description ?? "No description available.")  // Provide default value
+                    Text(album.description ?? "No description available.") // 提供默認值以防無描述
                         .foregroundColor(.text_primary_f1)
-                        .modifier(FontModifier(.regular, size: 16)) // Adjust font size and style as needed
-                        .padding()
+                        .modifier(FontModifier(.regular, size: 16)) // 調整字體大小和樣式
+                        .padding() // 添加內邊距
                 }
-                .frame(maxHeight: 300) // Set the maximum height for the scrollable area
+                .frame(maxHeight: 300) // 設置可滾動區域的最大高度
 
-                // Check if there's a valid purchase link and show it
+                // 檢查是否有有效的購買鏈接並顯示
                 if let link = album.Link {
-                    Link("Enjoy the Album", destination: link)
-                        .foregroundColor(.blue)
-                        .padding(.top, 20)
+                    Link("Enjoy the Album", destination: link) // 使鏈接可點擊
+                        .foregroundColor(.blue) // 設置字體顏色
+                        .padding(.top, 20) // 添加上方內邊距
                 }
 
-                Spacer()
+                Spacer() // 添加間距以推動元素向上
 
+                // 返回按鈕
                 Button("Back") {
-                    presentationMode.wrappedValue.dismiss() // Dismiss the view
+                    presentationMode.wrappedValue.dismiss() // 關閉當前視圖
                 }
-                .padding()
+                .padding() // 添加內邊距
             }
-            .padding(.bottom, 20)
+            .padding(.bottom, 20) // 添加底部內邊距
         }
     }
 }
 
 
+// 播放器專輯封面視圖
 fileprivate struct PlayerDiscView: View {
-    let coverImage: Image
+    let coverImage: Image // 專輯封面圖片
+    
     var body: some View {
         ZStack {
+            // 繪製圓形背景
             Circle()
-                .foregroundColor(.primary_color)
-                .frame(width: 300, height: 300)
-                .modifier(NeuShadow())
+                .foregroundColor(.primary_color) // 設置圓形的填充顏色
+                .frame(width: 300, height: 300) // 設置圓形的大小
+                .modifier(NeuShadow()) // 添加模糊陰影效果
+            
+            // 繪製多個圓形邊界
             ForEach(0..<15, id: \.self) { i in
-                RoundedRectangle(cornerRadius: (150 + CGFloat((8 * i))) / 2)
-                    .stroke(lineWidth: 0.25)
-                    .foregroundColor(.disc_line)
-                    .frame(width: 150 + CGFloat((8 * i)),
-                           height: 150 + CGFloat((8 * i)))
+                RoundedRectangle(cornerRadius: (150 + CGFloat((8 * i))) / 2) // 繪製圓角矩形
+                    .stroke(lineWidth: 0.25) // 設置邊界的線寬
+                    .foregroundColor(.disc_line) // 設置邊界顏色
+                    .frame(width: 150 + CGFloat((8 * i)), // 設置寬度
+                           height: 150 + CGFloat((8 * i))) // 設置高度
             }
+            
+            // 顯示專輯封面圖片
             coverImage
-                .resizable()
-                .scaledToFill()
-                .frame(width: 120, height: 120)
-                .cornerRadius(60)
+                .resizable() // 使圖片可調整大小
+                .scaledToFill() // 按比例填充視圖
+                .frame(width: 120, height: 120) // 設置圖片的大小
+                .cornerRadius(60) // 添加圓角效果
         }
     }
 }
 
+// 專輯視圖
 struct AlbumsView: View {
     
-    let name: String
-    let artistName: String
-    let coverImage: Image
+    let name: String // 專輯名稱
+    let artistName: String // 藝術家名稱
+    let coverImage: Image // 專輯封面圖片
     
     var body: some View {
-        VStack(alignment: .center, spacing: 0) {
+        VStack(alignment: .center, spacing: 0) { // 垂直堆疊視圖
+            // 顯示專輯封面圖片
             coverImage
-                .resizable()
-                .scaledToFill()
-                .frame(width: 114, height: 88)
-                .cornerRadius(16)
+                .resizable() // 使圖片可調整大小
+                .scaledToFill() // 按比例填充視圖
+                .frame(width: 114, height: 88) // 設置圖片的寬度和高度
+                .cornerRadius(16) // 添加圓角效果
+            
+            // 顯示專輯名稱
             Text(name)
-                .foregroundColor(.text_primary)
-                .modifier(FontModifier(.bold, size: 16))
-                .padding(.top, 12)
-                .padding(.bottom, 6)
+                .foregroundColor(.text_primary) // 設置文字顏色
+                .modifier(FontModifier(.bold, size: 16)) // 設置字體樣式和大小
+                .padding(.top, 12) // 在上方添加填充
+                .padding(.bottom, 6) // 在下方添加填充
+            
+            // 顯示藝術家名稱
             Text(artistName)
-                .foregroundColor(.text_primary_f1)
-                .modifier(FontModifier(.regular, size: 12))
-                .padding(.bottom, 8)
+                .foregroundColor(.text_primary_f1) // 設置文字顏色
+                .modifier(FontModifier(.regular, size: 12)) // 設置字體樣式和大小
+                .padding(.bottom, 8) // 在下方添加填充
         }
-        .padding(12)
-        .background(Color.primary_color)
-        .cornerRadius(24)
-        .modifier(NeuShadow())
+        .padding(12) // 在整個視圖周圍添加填充
+        .background(Color.primary_color) // 設置背景顏色
+        .cornerRadius(24) // 添加圓角效果
+        .modifier(NeuShadow()) // 添加陰影效果以增強視覺效果
     }
 }
 
+// 音樂圓盤視圖
 struct MusicDiscView: View {
     
-    let name: String
-    let artistName: String
-    let coverImage: Image
+    let name: String // 專輯名稱
+    let artistName: String // 藝術家名稱
+    let coverImage: Image // 專輯封面圖片
     
     var body: some View {
-        VStack(alignment: .center, spacing: 0) {
-            ZStack {
+        VStack(alignment: .center, spacing: 0) { // 垂直堆疊視圖
+            ZStack { // 使用 ZStack 來重疊元素
+                // 背景圓形
                 Circle()
-                    .foregroundColor(.primary_color)
-                    .frame(width: 180, height: 180)
-                    .modifier(NeuShadow())
+                    .foregroundColor(.primary_color) // 設置圓形的背景顏色
+                    .frame(width: 180, height: 180) // 設置圓形的寬度和高度
+                    .modifier(NeuShadow()) // 添加陰影效果
+
+                // 添加多層次的邊框效果
                 ForEach(0..<10, id: \.self) { i in
-                    RoundedRectangle(cornerRadius: (80 + CGFloat((6 * i))) / 2)
-                        .stroke(lineWidth: 0.25)
-                        .foregroundColor(.disc_line)
-                        .frame(width: 80 + CGFloat((6 * i)),
-                               height: 80 + CGFloat((6 * i)))
+                    RoundedRectangle(cornerRadius: (80 + CGFloat((6 * i))) / 2) // 設置圓角
+                        .stroke(lineWidth: 0.25) // 設置邊框寬度
+                        .foregroundColor(.disc_line) // 設置邊框顏色
+                        .frame(width: 80 + CGFloat((6 * i)), // 設置邊框的寬度
+                               height: 80 + CGFloat((6 * i))) // 設置邊框的高度
                 }
+
+                // 顯示專輯封面圖片
                 coverImage
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 70, height: 70)
-                    .cornerRadius(35)
+                    .resizable() // 使圖片可調整大小
+                    .scaledToFill() // 按比例填充視圖
+                    .frame(width: 70, height: 70) // 設置封面圖片的寬度和高度
+                    .cornerRadius(35) // 添加圓角效果
             }
+            // 顯示專輯名稱
             Text(name)
-                .foregroundColor(.text_primary)
-                .modifier(FontModifier(.bold, size: 16))
-                .padding(.top, 12)
-                .padding(.bottom, 6)
+                .foregroundColor(.text_primary) // 設置文字顏色
+                .modifier(FontModifier(.bold, size: 16)) // 設置字體樣式和大小
+                .padding(.top, 12) // 在上方添加填充
+                .padding(.bottom, 6) // 在下方添加填充
+            
+            // 顯示藝術家名稱
             Text(artistName)
-                .foregroundColor(.text_primary_f1)
-                .modifier(FontModifier(.regular, size: 12))
-                .padding(.bottom, 8)
+                .foregroundColor(.text_primary_f1) // 設置文字顏色
+                .modifier(FontModifier(.regular, size: 12)) // 設置字體樣式和大小
+                .padding(.bottom, 8) // 在下方添加填充
         }
     }
 }
 
+// 藝術家視圖
 struct ArtistView: View {
     var body: some View {
-        HStack(alignment: .center, spacing: 0) {
+        HStack(alignment: .center, spacing: 0) { // 水平堆疊視圖
+            // 藝術家圖片
             Image.profile_pic
-                .resizable()
-                .scaledToFill()
-                .frame(width: 114, height: 140)
-                .cornerRadius(16)
-            VStack(alignment: .leading, spacing: 8) {
-                Text("藤井 風")
-                    .foregroundColor(.text_primary)
-                    .modifier(FontModifier(.bold, size: 18))
-                Text("Fujii Kaze is a Japanese vegetarian singer songwriter i He is spreading love and freedom to the world thru his music and life sid He's released two albums so far, both reached No. 1 on Billboard Japan's Hot Albums chart.")
-                    .foregroundColor(.text_primary_f1)
-                    .modifier(FontModifier(.regular, size: 13))
+                .resizable() // 使圖片可調整大小
+                .scaledToFill() // 按比例填充視圖
+                .frame(width: 114, height: 140) // 設置圖片的寬度和高度
+                .cornerRadius(16) // 添加圓角效果
+            
+            VStack(alignment: .leading, spacing: 8) { // 垂直堆疊視圖，對齊到左側
+                // 藝術家名稱
+                Text("藤井 風") // 藝術家的名字
+                    .foregroundColor(.text_primary) // 設置文字顏色
+                    .modifier(FontModifier(.bold, size: 18)) // 設置字體樣式和大小
+                
+                // 藝術家簡介
+                Text("Fujii Kaze is a Japanese vegetarian singer songwriter. He is spreading love and freedom to the world thru his music and life. He's released two albums so far, both reached No. 1 on Billboard Japan's Hot Albums chart.")
+                    .foregroundColor(.text_primary_f1) // 設置文字顏色
+                    .modifier(FontModifier(.regular, size: 13)) // 設置字體樣式和大小
             }
-            .padding(.leading, 12)
-            Spacer()
+            .padding(.leading, 12) // 在左側添加填充
+            Spacer() // 添加彈性空間，使其自動對齊
         }
-        .padding(12)
-        .background(Color.primary_color)
-        .cornerRadius(24)
-        .modifier(NeuShadow())
+        .padding(12) // 在外部添加填充
+        .background(Color.primary_color) // 設置背景顏色
+        .cornerRadius(24) // 添加圓角效果
+        .modifier(NeuShadow()) // 添加陰影效果
     }
 }
 
 
+// 擴展 Color 結構以添加自定義顏色
 extension Color {
     
-    static let primary_color = Color(white)
-    static let main_color = Color(hex: "657592")
-    static let main_white = Color(hex: "657592")
+    // 自定義顏色屬性
+    static let primary_color = Color(white: 1) // 設置主要顏色為白色
+    static let main_color = Color(hex: "657592") // 使用十六進制顏色設置主要顏色
+    static let main_white = Color(hex: "657592") // 使用同樣的十六進制顏色設置主白色
     
-    static let text_header = Color(hex: "333333")
-    static let text_primary = Color(hex: "657592")
-    static let text_primary_f1 = Color.text_primary.opacity(0.8)
+    // 文字顏色設置
+    static let text_header = Color(hex: "333333") // 頭部文字顏色
+    static let text_primary = Color(hex: "657592") // 主要文字顏色
+    static let text_primary_f1 = Color.text_primary.opacity(0.8) // 主要文字顏色的透明度設置為 80%
     
-    static let disc_line = Color(hex: "666666")
+    // 碟片線條顏色
+    static let disc_line = Color(hex: "666666") // 碟片邊框顏色
     
+    // 十六進制顏色初始化器
     init(hex: String, alpha: Double = 1) {
+        // 清理十六進制字符串並轉換為大寫
         var cString: String = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        if (cString.hasPrefix("#")) { cString.remove(at: cString.startIndex) }
+        if (cString.hasPrefix("#")) { cString.remove(at: cString.startIndex) } // 去除前綴 #
         
-        let scanner = Scanner(string: cString)
+        let scanner = Scanner(string: cString) // 創建一個掃描器來解析十六進制顏色
         scanner.currentIndex = scanner.string.startIndex
-        var rgbValue: UInt64 = 0
-        scanner.scanHexInt64(&rgbValue)
-        let r = (rgbValue & 0xff0000) >> 16
-        let g = (rgbValue & 0xff00) >> 8
-        let b = rgbValue & 0xff
-        self.init(.sRGB, red: Double(r) / 0xff, green: Double(g) / 0xff, blue:  Double(b) / 0xff, opacity: alpha)
+        var rgbValue: UInt64 = 0 // 儲存 RGB 值
+        scanner.scanHexInt64(&rgbValue) // 從字符串中掃描十六進制整數
+        
+        // 提取紅色、綠色和藍色分量
+        let r = (rgbValue & 0xff0000) >> 16 // 提取紅色分量
+        let g = (rgbValue & 0xff00) >> 8 // 提取綠色分量
+        let b = rgbValue & 0xff // 提取藍色分量
+        
+        // 初始化 Color 物件，使用 sRGB 色彩空間
+        self.init(.sRGB, red: Double(r) / 0xff, green: Double(g) / 0xff, blue: Double(b) / 0xff, opacity: alpha)
     }
 }
 
@@ -758,16 +843,19 @@ enum ArialFontType: String {
 // 自定義字體修改器
 struct FontModifier: ViewModifier {
     
-    var type: ArialFontType    // 使用新的字體枚舉
-    var size: CGFloat
+    var type: ArialFontType    // 使用新的字體枚舉，定義字體類型
+    var size: CGFloat           // 定義字體大小
     
+    // 初始化函數，設置字體類型和大小的默認值
     init(_ type: ArialFontType = .regular, size: CGFloat = 16) {
-        self.type = type
-        self.size = size
+        self.type = type // 設置字體類型
+        self.size = size // 設置字體大小
     }
     
+    // ViewModifier 的必須實現方法
     func body(content: Content) -> some View {
-        content.font(Font.custom(type.rawValue, size: size))  // 使用新字體
+        // 使用 Font.custom 方法應用自定義字體和大小
+        content.font(Font.custom(type.rawValue, size: size))
     }
 }
 
@@ -775,25 +863,26 @@ struct FontModifier: ViewModifier {
 extension Image {
     
     // 圖示
-    static let close = Image("arrow_down")
-    static let options = Image("options_icon")
-    static let search = Image("search_icon")
-    static let play = Image("play_icon")
-    static let pause = Image("pause_icon")
-    static let heart = Image("heart_icon")
-    static let heart_filled = Image("heart-filled_icon")
-    static let next = Image("next_icon")
+    static let close = Image("arrow_down")         // 關閉按鈕圖示
+    static let options = Image("options_icon")      // 選項按鈕圖示
+    static let search = Image("search_icon")        // 搜索按鈕圖示
+    static let play = Image("play_icon")            // 播放按鈕圖示
+    static let pause = Image("pause_icon")          // 暫停按鈕圖示
+    static let heart = Image("heart_icon")          // 喜歡按鈕圖示（空心）
+    static let heart_filled = Image("heart-filled_icon") // 喜歡按鈕圖示（實心）
+    static let next = Image("next_icon")            // 下一曲按鈕圖示
     
     // 個人資料圖片
-    static let profile_pic = Image("profile_pic")
+    static let profile_pic = Image("profile_pic")   // 個人資料圖片
     
     // 封面圖片
-    static let cover1 = Image("cover1")
-    static let cover2 = Image("cover2")
-    static let cover3 = Image("cover3")
-    static let cover4 = Image("cover4")
-    static let cover5 = Image("cover5")
+    static let cover1 = Image("cover1")             // 封面圖片1
+    static let cover2 = Image("cover2")             // 封面圖片2
+    static let cover3 = Image("cover3")             // 封面圖片3
+    static let cover4 = Image("cover4")             // 封面圖片4
+    static let cover5 = Image("cover5")             // 封面圖片5
 }
+
 
     // NeuShadow 的視圖修飾符，用於創建具有神經網絡風格（Neumorphism）陰影效果的視圖
 struct NeuShadow: ViewModifier {
