@@ -48,8 +48,8 @@ A SwiftUI-based iOS application showcasing the music and upcoming concerts of Ja
 ### Custom Color System
 
 
-
-Project Structure
+## Project Structure
+Copy
 ├── Views
 │   ├── HomeView.swift
 │   ├── PlayerView.swift
